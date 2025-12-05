@@ -1,0 +1,62 @@
+name: Check Streamlink repo for Updates
+
+on:
+  schedule:
+    - cron: '15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  check_and_update:
+    runs-on: ubuntu-latest
+    env:
+      REPO_A_OWNER: 'streamlink'
+      REPO_A_NAME: 'streamlink'
+      REPO_A_BRANCH: 'master'
+      FILE_TO_UPDATE: 'Dockerfile'
+
+    steps:
+    - name: Checkout docker-better-streamlink-recorder-twitch
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.REPO_PAT }}
+
+    - name: Get latest commit hash from streamlink repo
+      id: get_latest_hash
+      run: |
+        LATEST_HASH=$(curl -s "https://api.github.com/repos/${{ env.REPO_A_OWNER }}/${{ env.REPO_A_NAME }}/commits/${{ env.REPO_A_BRANCH }}" | jq -r .sha)
+        
+        if [ "$LATEST_HASH" == "null" ] || [ -z "$LATEST_HASH" ]; then
+          echo "Error: Could not retrieve hash from Streamlink repo. Check github.com/streamlink/streamlink."
+          exit 1
+        fi
+        echo "LATEST_HASH=$LATEST_HASH" >> $GITHUB_OUTPUT
+        echo "Retrieved latest hash from Streamlink repo: $LATEST_HASH"
+      
+    - name: Read current commit hash from Dockerfile
+      id: read_current_hash
+      run: |
+        CURRENT_HASH=$(grep 'ENV streamlinkCommit=' ${{ env.FILE_TO_UPDATE }} | cut -d'=' -f2 | tr -d ' ' | tr -d '"')
+        echo "CURRENT_HASH=$CURRENT_HASH" >> $GITHUB_OUTPUT
+        echo "Current hash in our repo: $CURRENT_HASH"
+
+    - name: Check for update
+      id: check
+      if: ${{ steps.get_latest_hash.outputs.LATEST_HASH != steps.read_current_hash.outputs.CURRENT_HASH }}
+      run: |
+        echo "::notice::Hash has changed. Proceeding with update."
+        echo "update_needed=true" >> $GITHUB_OUTPUT
+        
+    - name: Update file with new hash
+      if: ${{ steps.check.outputs.update_needed == 'true' }}
+      run: |
+        NEW_HASH="${{ steps.get_latest_hash.outputs.LATEST_HASH }}"
+        sed -i "s/^ENV streamlinkCommit=.*/ENV streamlinkCommit=$NEW_HASH/" ${{ env.FILE_TO_UPDATE }}
+
+    - name: Commit and push to our repo
+      if: ${{ steps.check.outputs.update_needed == 'true' }}
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add ${{ env.FILE_TO_UPDATE }}
+        git commit -m "Automated: Update Streamlink commit hash to ${{ steps.get_latest_hash.outputs.LATEST_HASH }}"
+        git push
