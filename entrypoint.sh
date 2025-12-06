@@ -17,7 +17,7 @@ check_required_var TWITCH_USER_TOKEN
 
 check_required_dir() {
     local dir_name="$1"
-    if touch "{$dir_name}/.write_test" 2>/dev/null; then
+    if [ -w "$dir_name" ]; then
         rm -f "{$dir_name}/.write_test"
     else
         echo "ERROR: The mounted directory ${dir_name} is NOT writeable." >&2
@@ -28,10 +28,6 @@ check_required_dir /etc/streamlink/scratch
 check_required_dir /storage
 
 if [ "$ErrorPresent" -eq 0 ]; then
-    echo "Current Username: $(id -un)"
-    echo "Primary Group: $(id -gn)"
-    echo "Sleeping"
-    sleep 10
     exit 1
 fi
 
