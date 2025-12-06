@@ -1,8 +1,6 @@
-ARG TARGETPLATFORM
-ARG TARGETARCH=${TARGETPLATFORM##*/}
-
 FROM python:3.12.2
 LABEL org.opencontainers.image.authors="crashahotrod@gmail.com"
+ARG TARGETARCH
 ARG YTU_RELEASE=1.25.5
 ARG BINARY_DOWNLOAD_URL="https://github.com/porjo/youtubeuploader/releases/download/v${YTU_RELEASE}/youtubeuploader_${YTU_RELEASE}_Linux_${TARGETARCH}.tar.gz"
 RUN echo "Downloading ${BINARY_DOWNLOAD_URL}..." curl -L -o /youtubeuploader.tar.gz "${BINARY_DOWNLOAD_URL}"
