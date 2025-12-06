@@ -10,10 +10,13 @@ check_required_var() {
         ErrorPresent=0
     fi
 }
+check_required_var MODE
 check_required_var CHANNEL
-check_required_var TWITCH_CLIENT_ID
-check_required_var TWITCH_CLIENT_SECRET
-check_required_var TWITCH_USER_TOKEN
+check_required_var CLIENT_ID
+check_required_var CLIENT_SECRET
+if [ $MODE == "twitch"]; then
+    check_required_var TWITCH_USER_TOKEN
+fi
 
 check_required_dir() {
     local dir_name="$1"
@@ -31,5 +34,5 @@ if [ "$ErrorPresent" -eq 0 ]; then
     exit 1
 fi
 
-mkdir -p /etc/streamlink/scratch/$CHANNEL/{encode,download}
+mkdir -p /etc/streamlink/scratch/$MODE/$CHANNEL/{encode,download}
 exec "$@"
