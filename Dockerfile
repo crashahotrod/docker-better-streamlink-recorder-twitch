@@ -1,7 +1,3 @@
-ARG TARGETPLATFORM
-ARG TARGETOS
-ARG TARGETARCH
-
 FROM python:3.12.2
 LABEL org.opencontainers.image.authors="crashahotrod@gmail.com"
 ARG YTU_RELEASE=1.25.5
