@@ -157,7 +157,7 @@ notify_discord() {
 # ------------------------------------------------------------
 echo "[Monitor] Starting live status loop for channel: $CHANNEL"
 
-if [ "$YOUTUBE_SPLITTING" == true ]; then
+if [ "${YOUTUBE_SPLITTING:-false}" == "true" ]; then
     HLS_DURATION="--hls-duration 11h59m30s"
 else
     HLS_DURATION=""
@@ -209,7 +209,7 @@ if [ $MODE == "twitch" ]; then
             "twitch.tv/${CHANNEL}" best
 
         echo "[Monitor] Streamlink completed. Checking status again..."
-        if [ $UPLOAD == "false" ]; then
+        if [ "{$UPLOAD:-false}" == "false" ]; then
             mv "$outfile" "$ENCODE_DIR/$FILENAME"
             echo moved "$NEWFILE" to "$ENCODE_DIR/$FILENAME"
         fi
@@ -244,7 +244,7 @@ elif [ $MODE == "kick" ]; then
         echo "[Monitor] $CHANNEL is LIVE on Kick!"
         echo "[Monitor] Title: $title"
         echo "[Monitor] Output: $outfile"
-        if [ "$DISCORD_WEBHOOK_URL" != ""]; then
+        if [ "${DISCORD_WEBHOOK_URL:-}" != "" ]; then
             notify_discord "**${CHANNEL} is LIVE!**\nTitle: ${title}"
         fi
 
@@ -258,7 +258,7 @@ elif [ $MODE == "kick" ]; then
             "kick.com/${CHANNEL}" best
 
         echo "[Monitor] Streamlink completed. Checking status again..."
-        if [ $UPLOAD == "false" ]; then
+        if [ "{$UPLOAD:-false}" == "false" ]; then
             mv "$outfile" "$ENCODE_DIR/$FILENAME"
             echo moved "$NEWFILE" to "$ENCODE_DIR/$FILENAME"
         fi
