@@ -14,7 +14,7 @@ check_required_var MODE
 check_required_var CHANNEL
 check_required_var CLIENT_ID
 check_required_var CLIENT_SECRET
-if [ $MODE == "twitch"]; then
+if [ $MODE == "twitch" ]; then
     check_required_var TWITCH_USER_TOKEN
 fi
 
@@ -42,7 +42,7 @@ check_required_file() {
     fi
 }
 
-if [ $UPLOAD == "true"]; then
+if [ $UPLOAD == "true" ]; then
     check_required_var UPLOAD_BOT_NAME
     sed -i '/^\[program:streamlink_upload\]/,/^\[/ {/autostart=fs6alse/ s/autostart=false/autostart=true/}' /etc/supervisor/conf.d/supervisord.conf
     if check_required_file "/config/youtubeuploader_client_secrets.json" && check_required_file "/config/youtubeuploader_request.token"; then

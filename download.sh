@@ -220,7 +220,8 @@ elif [ $MODE == "kick" ]; then
         ensure_kick_token
         json=$(get_kick_channel_info 2>/dev/null)
         live=$(echo "$json" | jq '.data[0].stream.is_live')
-
+        echo "[Debug] $live"
+        echo "[Full Debug] $json"
         if [ live != "true" ]; then
             echo "[Monitor] Channel ${CHANNEL} not live. Checking again in ${CHECK_INTERVAL}s."
             sleep "$CHECK_INTERVAL"
