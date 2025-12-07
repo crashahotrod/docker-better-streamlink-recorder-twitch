@@ -1,5 +1,6 @@
 # docker-better-streamlink-recorder
 Automated Dockerfile to record Twitch & Kick livestreams with streamlink
+https://hub.docker.com/r/crashahotrod/docker-better-streamlink-recorder
 
 ## Features
  - Support for both Twitch & Kick
@@ -7,7 +8,7 @@ Automated Dockerfile to record Twitch & Kick livestreams with streamlink
  - Support for upload to YouTube
  - Support for Discord go live notifications
 
-## Enviroment variables
+## Environment variables
 ### Required
 'MODE' - Set to the streaming service you'd like to monitor Kick or Twitch
 
