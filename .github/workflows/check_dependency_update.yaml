@@ -1,4 +1,4 @@
-name: Check Streamlink repo for Updates
+name: Check Dependencies for Updates
 
 on:
   schedule:
@@ -23,14 +23,22 @@ jobs:
     - name: Get latest commit hash from streamlink repo
       id: get_latest_hash
       run: |
-        LATEST_HASH=$(curl -s "https://api.github.com/repos/${{ env.REPO_A_OWNER }}/${{ env.REPO_A_NAME }}/commits/${{ env.REPO_A_BRANCH }}" | jq -r .sha)
+        MAX_ATTEMPTS=3
+        ATTEMPT=1
+        while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+          LATEST_HASH=$(curl -s "https://api.github.com/repos/${{ env.REPO_A_OWNER }}/${{ env.REPO_A_NAME }}/commits/${{ env.REPO_A_BRANCH }}" | jq -r .sha)
         
-        if [ "$LATEST_HASH" == "null" ] || [ -z "$LATEST_HASH" ]; then
-          echo "Error: Could not retrieve hash from Streamlink repo. Check github.com/streamlink/streamlink."
-          exit 1
-        fi
-        echo "LATEST_HASH=$LATEST_HASH" >> $GITHUB_OUTPUT
-        echo "Retrieved latest hash from Streamlink repo: $LATEST_HASH"
+          if [ "$LATEST_HASH" == "null" ] || [ -z "$LATEST_HASH" ]; then
+            echo "Error: Could not retrieve hash from Streamlink repo. Check github.com/streamlink/streamlink."
+            echo "Waiting 5 seconds before next retry..."
+            sleep 5
+          else
+            echo "hash=$LATEST_HASH" >> $GITHUB_OUTPUT
+            echo "Retrieved latest hash from Streamlink repo: $LATEST_HASH"
+            exit 0
+          fi
+        done
+        exit 1
       
     - name: Read current Streamlink commit hash from Dockerfile
       id: read_current_hash
@@ -39,13 +47,25 @@ jobs:
         echo "CURRENT_HASH=$CURRENT_HASH" >> $GITHUB_OUTPUT
         echo "Current hash in our repo: $CURRENT_HASH"
 
-    - name: Get latest tag from youtubeuploader repo
+    - name: Get latest tag from Youtubeuploader repo
       id: get_ytu_latest_tag
       run: |
-        release_json=$(curl https://api.github.com/repos/porjo/youtubeuploader/releases/latest)
-        LATEST_TAG=$(echo "$release_json" | jq -r '.tag_name')
-        echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
-        echo "Retrieved latest tag from youtubeuploader repo: $LATEST_TAG"
+        MAX_ATTEMPTS=3
+        ATTEMPT=1
+        while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+          release_json=$(curl https://api.github.com/repos/porjo/youtubeuploader/releases/latest)
+          LATEST_TAG=$(echo "$release_json" | jq -r '.tag_name')
+          if [ "$LATEST_HASH" == "null" ] || [ -z "$LATEST_HASH" ]; then
+            echo "Error: Could not retrieve tag from Youtubeuploader repo. Check github.com/porjo/youtubeuploader/releases/latest."
+            echo "Waiting 5 seconds before next retry..."
+            sleep 5
+          else
+            echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
+            echo "Retrieved latest tag from youtubeuploader repo: $LATEST_TAG"
+            exit 0
+          fi
+        done
+        exit 1
 
     - name: Read current Youtubeuploder release tag from Dockerfile
       id: read_current_ytu_tag
