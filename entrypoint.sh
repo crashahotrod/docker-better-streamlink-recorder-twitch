@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e
 
-ErrorPresent=1
+ErrorPresent=0
 
 check_required_var() {
     local var_name="$1"
     if [ -z "${!var_name}" ]; then
         echo "ERROR: Required environment variable $var_name is not set." >&2
-        ErrorPresent=0
+        ErrorPresent=1
     fi
 }
 check_required_var MODE
@@ -24,11 +24,11 @@ chown -R "$USER_NAME:$USER_NAME" /config /storage /etc/streamlink/scratch
 
 check_required_dir() {
     local dir_name="$1"
-    if ! gosu $USER_NAME test -w "$dir_name"; then
+    if gosu $USER_NAME test -w "$dir_name"; then
         rm -f "{$dir_name}/.write_test"
     else
         echo "ERROR: The mounted directory ${dir_name} is NOT writeable by $USER_NAME." >&2
-        ErrorPresent=0
+        ErrorPresent=1
     fi
 }
 check_required_dir /etc/streamlink/scratch
@@ -41,7 +41,7 @@ check_required_file() {
         return 0
     else
         echo "ERROR: Required file ${file_name} does not exist or is not readable by $USER_NAME." >&2
-        ErrorPresent=0
+        ErrorPresent=1
         return 1
     fi
 }
@@ -59,7 +59,7 @@ if [ "{$ENCODE:-false}" == "true" ]; then
     sed -i '/^\[program:streamlink_encode\]/,/^\[/ {/autostart=false/ s/autostart=false/autostart=true/}' /etc/supervisor/conf.d/supervisord.conf
 fi
 
-if [ "$ErrorPresent" -eq 0 ]; then
+if [ "$ErrorPresent" -eq 1 ]; then
     sleep 30
     exit 1
 fi
