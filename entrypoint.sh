@@ -65,6 +65,7 @@ if [ "$ErrorPresent" -eq 1 ]; then
 fi
 chown -R "$USER_NAME:$USER_NAME" /etc/supervisor/conf.d/
 chmod 444 /etc/supervisor/conf.d/supervisord.conf
+chmod 666 /dev/stdout /dev/stderr
 mkdir -p /etc/streamlink/scratch/$MODE/$CHANNEL/{encode,download}
 echo "Starting application as $USER_NAME (UID: $(id -u $USER_NAME))..."
 exec gosu $USER_NAME "$@"
