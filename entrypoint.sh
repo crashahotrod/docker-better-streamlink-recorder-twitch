@@ -76,6 +76,5 @@ if [ -f /tmp/dbus_env ]; then
     export DBUS_SESSION_BUS_PID
     echo "DBus started for $USER_NAME user at: $DBUS_SESSION_BUS_ADDRESS"
 fi
-ln -sf "$DBUS_SESSION_BUS_ADDRESS" /run/dbus/system_bus_socket
 echo "Starting application as $USER_NAME (UID: $(id -u $USER_NAME))..."
 exec gosu $USER_NAME "$@"
